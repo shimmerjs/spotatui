@@ -4,17 +4,20 @@
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
     flake-utils.url = "github:numtide/flake-utils";
   };
-  outputs = {
-    self,
-    nixpkgs,
-    flake-utils,
-  }:
+  outputs =
+    {
+      self,
+      nixpkgs,
+      flake-utils,
+    }:
     flake-utils.lib.eachDefaultSystem (
-      system: let
+      system:
+      let
         pkgs = import nixpkgs {
           inherit system;
         };
-      in {
+      in
+      {
         # Build dependencies for rust
         packages = rec {
           default = pkgs.rustPlatform.buildRustPackage {
@@ -31,17 +34,21 @@
               llvmPackages.clang
               llvmPackages.libclang
             ];
-            buildInputs = with pkgs;
+            buildInputs =
+              with pkgs;
               [
                 openssl
+              ]
+              ++ pkgs.lib.optionals pkgs.stdenv.isLinux [
                 alsa-lib
                 dbus
                 pipewire
               ]
               # Build inputs for nix-darwin
               ++ pkgs.lib.optionals pkgs.stdenv.isDarwin [
-                pkgs.darwin.apple_sdk.frameworks.Security
-                pkgs.darwin.apple_sdk.frameworks.SystemConfiguration
+                # macOS specific dependencies - use latest supported Apple SDK
+                pkgs.apple-sdk
+                pkgs.portaudio
               ];
             meta = with pkgs.lib; {
               description = "A Spotify client for the terminal written in Rust, powered by Ratatui";
